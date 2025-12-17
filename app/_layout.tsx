@@ -1,38 +1,50 @@
-import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Stack } from "expo-router";
+import { Image } from "react-native";
+import { AuthProvider } from "./context/AuthContext";
 
-export default function TabLayout() {
+export default function RootLayout() {
   return (
-    <Tabs>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <Ionicons size={26} name="home" color={color} />
-          ),
-        }}
-      />
+    <AuthProvider>
+      <Stack
+        screenOptions={{
+          headerTitleAlign: "center",
 
-      <Tabs.Screen
-        name="courses"
-        options={{
-          title: "Courses",
-          tabBarIcon: ({ color }) => (
-            <Ionicons size={26} name="book" color={color} />
+          // ✅ Global logo in header
+          headerTitle: () => (
+            <Image
+              source={require("../assets/images/logo.png")}
+              style={{ width: 160, height: 40 }}
+              resizeMode="contain"
+            />
           ),
-        }}
-      />
 
-      <Tabs.Screen
-        name="attendance"
-        options={{
-          title: "Attendance",
-          tabBarIcon: ({ color }) => (
-            <Ionicons size={26} name="pencil" color={color} />
-          ),
+          headerShadowVisible: false,
+          headerStyle: {
+            backgroundColor: "#ffffff",
+          },
         }}
-      />
-    </Tabs>
+      >
+        {/* Tabs (no header, tabs manage their own header) */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+        {/* Course detail → keep default back */}
+        <Stack.Screen name="course-detail" />
+
+        {/* Login → keep default back */}
+        <Stack.Screen name="login" />
+
+        {/* 🔴 Enrolled Courses → REMOVE native back arrow */}
+        <Stack.Screen
+          name="enrolled-courses"
+          options={{
+            headerBackVisible: false, // removes back arrow
+            headerLeft: () => null,   // extra safety
+          }}
+        />
+
+        {/* Mark attendance → normal back allowed */}
+        <Stack.Screen name="mark-attendance" />
+      </Stack>
+    </AuthProvider>
   );
 }
