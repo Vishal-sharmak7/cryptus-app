@@ -19,15 +19,7 @@ export default function EnrollTabsLayout() {
         }}
       />
 
-      <Tabs.Screen
-        name="attendance"
-        options={{
-          title: "Attendance",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="checkmark-circle" size={20} color={color} />
-          ),
-        }}
-      />
+    
 
       <Tabs.Screen
         name="profile"

@@ -1,106 +1,9 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Alert, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-export default function Profile() {
-  return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: "#ffffff" }}
-      contentContainerStyle={{ padding: 20 }}
-    >
-      {/* HEADER */}
-      <Text
-        style={{
-          fontSize: 22,
-          fontWeight: "bold",
-          color: "#020617",
-          marginBottom: 20,
-        }}
-      >
-        Student Profile
-      </Text>
-
-      {/* PROFILE CARD */}
-      <View
-        style={{
-          backgroundColor: "#f8fafc",
-          borderRadius: 20,
-          padding: 20,
-          borderWidth: 1,
-          borderColor: "#e2e8f0",
-        }}
-      >
-        {/* AVATAR */}
-        <View
-          style={{
-            width: 90,
-            height: 90,
-            borderRadius: 45,
-            backgroundColor: "#e0e7ff",
-            justifyContent: "center",
-            alignItems: "center",
-            alignSelf: "center",
-            marginBottom: 16,
-          }}
-        >
-          <Ionicons name="person" size={48} color="#2563eb" />
-        </View>
-
-        {/* NAME */}
-        <Text
-          style={{
-            fontSize: 20,
-            fontWeight: "700",
-            color: "#020617",
-            textAlign: "center",
-          }}
-        >
-          Vishal Sharma
-        </Text>
-
-        <Text
-          style={{
-            fontSize: 14,
-            color: "#475569",
-            textAlign: "center",
-            marginTop: 4,
-          }}
-        >
-          Student ID: STU-1023
-        </Text>
-
-        {/* DIVIDER */}
-        <View
-          style={{
-            height: 1,
-            backgroundColor: "#e2e8f0",
-            marginVertical: 20,
-          }}
-        />
-
-        {/* INFO ROWS */}
-        <InfoRow icon="mail" label="Email" value="vishal@student.com" />
-        <InfoRow icon="call" label="Phone" value="+91 98765 43210" />
-        <InfoRow icon="school" label="Course" value="Cyber Security" />
-        <InfoRow icon="calendar" label="Joined" value="Jan 2025" />
-      </View>
-
-      {/* FOOTER */}
-      <Text
-        style={{
-          fontSize: 13,
-          color: "#64748b",
-          textAlign: "center",
-          marginTop: 30,
-        }}
-      >
-        Keep your profile information updated
-      </Text>
-    </ScrollView>
-  );
-}
+import { useRouter } from "expo-router";
+import { useAuth } from "../context/AuthContext";
 
 /* ---------------- INFO ROW ---------------- */
-
 function InfoRow({
   icon,
   label,
@@ -129,5 +32,66 @@ function InfoRow({
         <Text style={{ fontWeight: "600" }}>{label}:</Text> {value}
       </Text>
     </View>
+  );
+}
+
+/* ---------------- PROFILE ---------------- */
+export default function Profile() {
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to logout?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: async () => {
+            await logout();
+            router.replace("/login");
+          },
+        },
+      ]
+    );
+  };
+
+  return (
+    <ScrollView
+      style={{ flex: 1, backgroundColor: "#ffffff" }}
+      contentContainerStyle={{ padding: 20 }}
+    >
+      <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 20 }}>
+        Student Profile
+      </Text>
+
+      <View
+        style={{
+          backgroundColor: "#f8fafc",
+          borderRadius: 20,
+          padding: 20,
+          borderWidth: 1,
+          borderColor: "#e2e8f0",
+        }}
+      >
+        <InfoRow icon="mail" label="Email" value="vishal@student.com" />
+        <InfoRow icon="call" label="Phone" value="+91 98765 43210" />
+      </View>
+
+      <Pressable
+        onPress={handleLogout}
+        style={{
+          marginTop: 30,
+          backgroundColor: "#dc2626",
+          paddingVertical: 14,
+          borderRadius: 12,
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ color: "#fff", fontWeight: "bold" }}>Logout</Text>
+      </Pressable>
+    </ScrollView>
   );
 }
