@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import generateToken from "../utils/generateToken.js";
 
 const formatUserResponse = (user) => {
   const base = {
@@ -52,8 +53,12 @@ export const login = async (req, res) => {
     user.lastLogin = new Date();
     await user.save();
 
+    const token = generateToken(user);
+
+
     res.status(200).json({
       success: true,
+      token,
       message: "Login successful",
       user: formatUserResponse(user)
     });
