@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 
-export const  protect = async (req, res, next) => {
+export const protect = async (req, res, next) => {
   let token;
 
-  // Check Authorization header
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -12,16 +11,13 @@ export const  protect = async (req, res, next) => {
     token = req.headers.authorization.split(" ")[1];
   }
 
-  // No token
   if (!token) {
     return res.status(401).json({ message: "Not authorized, token missing" });
   }
 
   try {
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Attach user to request
     req.user = await User.findById(decoded.id).select("-password");
 
     if (!req.user) {

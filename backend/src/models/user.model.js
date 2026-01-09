@@ -5,31 +5,31 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
 
     username: {
       type: String,
       required: true,
       unique: true,
-      lowercase: true
+      lowercase: true,
     },
 
     password: {
       type: String,
-      required: true
+      required: true,
     },
 
     role: {
       type: String,
       enum: ["student", "teacher"],
-      required: true
+      required: true,
     },
 
     studentId: {
       type: String,
       unique: true,
-      sparse: true
+      sparse: true,
     },
 
     course: String,
@@ -38,17 +38,17 @@ const userSchema = new mongoose.Schema(
     employeeId: {
       type: String,
       unique: true,
-      sparse: true
+      sparse: true,
     },
 
     department: String,
 
     isActive: {
       type: Boolean,
-      default: true
+      default: true,
     },
 
-    lastLogin: Date
+    lastLogin: Date,
   },
   { timestamps: true }
 );

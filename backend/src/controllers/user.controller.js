@@ -49,7 +49,6 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid password" });
     }
 
-    // Optional but recommended
     user.lastLogin = new Date();
     await user.save();
 
@@ -67,3 +66,19 @@ export const login = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getUser = async (req, res) => {
+  try {
+    const { id } = req.params; // get user id from URL
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
