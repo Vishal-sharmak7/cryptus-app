@@ -62,3 +62,39 @@ export const updateEnrollmentStatus = async (req, res) => {
     res.status(500).json({ message: "Status update failed" });
   }
 };
+
+
+export const myEnrolledCourses = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const enrollments = await EnrollModel.find({
+      user: userId,
+      status: "approved",
+    }).populate(
+      "course",
+      "_id title description category duration level price thumbnail"
+    );
+
+    res.json({
+      total: enrollments.length,
+      courses: enrollments.map(e => ({
+        enrollmentId: e._id,
+        courseId: e.course?._id,
+        title: e.course?.title,
+        description: e.course?.description,
+        category: e.course?.category,
+        duration: e.course?.duration,
+        level: e.course?.level,
+        price: e.course?.price,
+        thumbnail: e.course?.thumbnail,
+        enrolledAt: e.enrolledAt,
+      })),
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+

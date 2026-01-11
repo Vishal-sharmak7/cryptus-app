@@ -3,7 +3,7 @@ import { getUser, login } from "../controllers/user.controller.js";
 import {createCourse, deleteCourse, getCourse} from "../controllers/course.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { allowRoles } from "../middlewares/role.middleware.js";
-import { enrollCourse, updateEnrollmentStatus } from "../controllers/enrollCourse.controller.js";
+import { enrollCourse, myEnrolledCourses, updateEnrollmentStatus } from "../controllers/enrollCourse.controller.js";
 
 const router = express.Router();
 
@@ -18,6 +18,8 @@ router.get("/getcourse", getCourse);
 // Student profile
 router.get("/student/profile/:id", protect, allowRoles("student"), getUser);
 router.post("/student/enrollCourse", protect, allowRoles("student"), enrollCourse);
+router.get("/student/my-courses", protect,allowRoles("student"), myEnrolledCourses);
+
 
 // Teacher profile
 router.get("/teacher/profile", protect, allowRoles("teacher"), login);
