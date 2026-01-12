@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import EnrollModel from "../models/enroll.model.js";
 
 export const enrollCourse = async (req, res) => {
@@ -64,37 +65,58 @@ export const updateEnrollmentStatus = async (req, res) => {
 };
 
 
+
 export const myEnrolledCourses = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = new mongoose.Types.ObjectId(req.user._id);
 
-    const enrollments = await EnrollModel.find({
-      user: userId,
-      status: "approved",
-    }).populate(
-      "course",
-      "_id title description category duration level price thumbnail"
-    );
+    const data = await EnrollModel.aggregate([
+      {
+        $match: {
+          user: userId,
+          status: "approved",
+        },
+      },
+      {
+        $lookup: {
+          from: "courses",
+          localField: "course",
+          foreignField: "_id",
+          as: "course",
+        },
+      },
+      {
+        $unwind: "$course",
+      },
+      {
+        $project: {
+          _id: 0,
+          enrollmentId: "$_id",
+          enrolledAt: 1,
+          status: 1,
+
+          courseMongoId: "$course._id",
+          courseId: "$course.courseId",
+          title: { $ifNull: ["$course.title", "$course.tittle"] },
+          description: "$course.description",
+          category: "$course.category",
+          duration: "$course.duration",
+          level: "$course.level",
+          price: "$course.price",
+          price: "$course.price",
+          isActive: "$course.isActive",
+        },
+      },
+    ]);
 
     res.json({
-      total: enrollments.length,
-      courses: enrollments.map(e => ({
-        enrollmentId: e._id,
-        courseId: e.course?._id,
-        title: e.course?.title,
-        description: e.course?.description,
-        category: e.course?.category,
-        duration: e.course?.duration,
-        level: e.course?.level,
-        price: e.course?.price,
-        thumbnail: e.course?.thumbnail,
-        enrolledAt: e.enrolledAt,
-      })),
+      total: data.length,
+      courses: data,
     });
 
   } catch (error) {
+    console.error("myEnrolledCourses error:", error);
     res.status(500).json({ message: error.message });
   }
 };
-
 
