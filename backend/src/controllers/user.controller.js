@@ -33,39 +33,46 @@ const formatUserResponse = (user) => {
 
 export const login = async (req, res) => {
   try {
-    const { username, password, role } = req.body;
+    const { username, password } = req.body;
 
-    if (!["student", "teacher"].includes(role)) {
-      return res.status(400).json({ message: "Invalid role" });
+    // 1️⃣ Basic validation
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password required" });
     }
 
-    const user = await User.findOne({ username, role });
+    // 2️⃣ Find user (ROLE COMES FROM DB)
+    const user = await User.findOne({ username });
 
     if (!user) {
       return res.status(404).json({ message: "Invalid credentials" });
     }
 
+    // 3️⃣ Verify password (⚠️ use bcrypt in production)
     if (user.password !== password) {
-      return res.status(401).json({ message: "Invalid password" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // 4️⃣ Update last login
     user.lastLogin = new Date();
     await user.save();
 
+    // 5️⃣ Generate JWT (includes role)
     const token = generateToken(user);
 
-
+    // 6️⃣ Send response
     res.status(200).json({
       success: true,
       token,
       message: "Login successful",
-      user: formatUserResponse(user)
+      user: formatUserResponse(user), // includes role
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
+
 
 export const getUser = async (req, res) => {
   try {

@@ -3,41 +3,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuth } from "../context/AuthContext";
 
-/* ---------------- INFO ROW ---------------- */
-function InfoRow({
-  icon,
-  label,
-  value,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  value: string;
-}) {
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 14,
-      }}
-    >
-      <Ionicons
-        name={icon}
-        size={18}
-        color="#2563eb"
-        style={{ marginRight: 12 }}
-      />
-
-      <Text style={{ color: "#020617", fontSize: 14 }}>
-        <Text style={{ fontWeight: "600" }}>{label}:</Text> {value}
-      </Text>
-    </View>
-  );
-}
-
-/* ---------------- PROFILE ---------------- */
 export default function Profile() {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -51,12 +18,20 @@ export default function Profile() {
           style: "destructive",
           onPress: async () => {
             await logout();
-            router.replace("/login");
+            router.replace("/login"); // 🔥 prevents back navigation
           },
         },
       ]
     );
   };
+
+  if (!user) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Not logged in</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -76,8 +51,9 @@ export default function Profile() {
           borderColor: "#e2e8f0",
         }}
       >
-        <InfoRow icon="mail" label="Email" value="vishal@student.com" />
-        <InfoRow icon="call" label="Phone" value="+91 98765 43210" />
+        <InfoRow icon="person" label="Username" value={user.username} />
+        <InfoRow icon="shield-checkmark" label="Role" value={user.role} />
+        <InfoRow icon="key" label="User ID" value={user._id} />
       </View>
 
       <Pressable
@@ -90,8 +66,30 @@ export default function Profile() {
           alignItems: "center",
         }}
       >
-        <Text style={{ color: "#fff", fontWeight: "bold" }}>Logout</Text>
+        <Text style={{ color: "#fff", fontWeight: "bold" }}>
+          Logout
+        </Text>
       </Pressable>
     </ScrollView>
+  );
+}
+
+/* ---------------- INFO ROW ---------------- */
+function InfoRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value?: string;
+}) {
+  return (
+    <View style={{ flexDirection: "row", marginBottom: 14 }}>
+      <Ionicons name={icon} size={18} color="#2563eb" style={{ marginRight: 12 }} />
+      <Text>
+        <Text style={{ fontWeight: "600" }}>{label}:</Text> {value || "—"}
+      </Text>
+    </View>
   );
 }

@@ -1,66 +1,70 @@
 import mongoose from "mongoose";
 import EnrollModel from "../models/enroll.model.js";
+import Course from "../models/course.model.js"; 
+
 
 export const enrollCourse = async (req, res) => {
   try {
-    const { user, course } = req.body;
+    const student = req.user._id; // ✅ from JWT
+    const { course } = req.body;
 
-    if (!user || !course) {
-      return res.status(400).json({ message: "User and Course are required" });
+    if (!course) {
+      return res.status(400).json({ message: "Course is required" });
     }
 
-    // prevent duplicate enrollment
-    const exists = await EnrollModel.findOne({ user, course });
+    const exists = await EnrollModel.findOne({ student, course });
     if (exists) {
-      return res.status(409).json({ message: "Already enrolled or request exists" });
+      return res.status(409).json({ message: "Enrollment already exists" });
     }
 
-    const enrollment = await EnrollModel.create({ user, course });
+    const enrollment = await EnrollModel.create({
+      student,
+      course,
+    });
 
     res.status(201).json({
       message: "Enrollment request sent",
       enrollment,
-      timestamp: enrollment.createdAt
     });
 
   } catch (error) {
-    console.error("Enrollment failed:", error);
-    res.status(500).json({ message: "Enrollment failed" });
+    res.status(500).json({ message: error.message });
   }
 };
 
 
-export const updateEnrollmentStatus = async (req, res) => {
+
+
+ export const updateEnrollmentStatus = async (req, res) => {
   try {
     const { enrollmentId, status } = req.body;
-
-    if (!enrollmentId || !status) {
-      return res.status(400).json({ message: "Enrollment ID and status required" });
-    }
 
     if (!["approved", "rejected"].includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
 
-    const enrollment = await EnrollModel.findByIdAndUpdate(
-      enrollmentId,
-      { status },
-      { new: true }
-    );
-
+    const enrollment = await EnrollModel.findById(enrollmentId);
     if (!enrollment) {
       return res.status(404).json({ message: "Enrollment not found" });
+    }
+
+    enrollment.status = status;
+    await enrollment.save();
+
+    // ✅ add student to course ONLY if approved
+    if (status === "approved") {
+      await Course.findByIdAndUpdate(enrollment.course, {
+        $addToSet: { students: enrollment.student },
+      });
     }
 
     res.json({
       message: `Enrollment ${status}`,
       enrollment,
-      timestamp: enrollment.updatedAt
     });
 
   } catch (error) {
-    console.error("Status update failed:", error);
-    res.status(500).json({ message: "Status update failed" });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -68,12 +72,12 @@ export const updateEnrollmentStatus = async (req, res) => {
 
 export const myEnrolledCourses = async (req, res) => {
   try {
-    const userId = new mongoose.Types.ObjectId(req.user._id);
+    const studentId = new mongoose.Types.ObjectId(req.user._id);
 
     const data = await EnrollModel.aggregate([
       {
         $match: {
-          user: userId,
+          student: studentId,
           status: "approved",
         },
       },
@@ -85,25 +89,16 @@ export const myEnrolledCourses = async (req, res) => {
           as: "course",
         },
       },
-      {
-        $unwind: "$course",
-      },
+      { $unwind: "$course" },
       {
         $project: {
-          _id: 0,
           enrollmentId: "$_id",
-          enrolledAt: 1,
           status: 1,
+          enrolledAt: "$createdAt",
 
-          courseMongoId: "$course._id",
           courseId: "$course.courseId",
-          title: { $ifNull: ["$course.title", "$course.tittle"] },
-          description: "$course.description",
-          category: "$course.category",
+          title: "$course.title",
           duration: "$course.duration",
-          level: "$course.level",
-          price: "$course.price",
-          price: "$course.price",
           isActive: "$course.isActive",
         },
       },
@@ -115,8 +110,6 @@ export const myEnrolledCourses = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("myEnrolledCourses error:", error);
     res.status(500).json({ message: error.message });
   }
 };
-

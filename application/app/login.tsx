@@ -1,22 +1,30 @@
-import { View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ActivityIndicator,
+} from "react-native";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuth } from "./context/AuthContext";
 
+const API_URL = "http://192.168.1.30:3000/api/v1/login";
+
 export default function Login() {
   const router = useRouter();
   const { login } = useAuth();
 
-  const [studentId, setStudentId] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    if (!studentId || !password) {
-      setError("Student ID and Password are required");
+    if (!username || !password) {
+      setError("Username and password are required");
       return;
     }
 
@@ -24,15 +32,39 @@ export default function Login() {
       setLoading(true);
       setError("");
 
-      // 🔐 Fake login (replace with API later)
-      await login({
-        id: studentId,
-        name: "Student",
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+          // ❌ DO NOT hard-code role here
+        }),
       });
 
-      router.replace("/(tabs)/attendance");
-    } catch (e) {
-      setError("Invalid Student ID or Password");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      // ✅ Save JWT + user
+      await login({
+        token: data.token,
+        user: data.user,
+      });
+
+      // 🎯 ROLE-BASED REDIRECT
+      if (data.user.role === "teacher") {
+        router.replace("/teacher/dashboard");
+      } else {
+        router.replace("/(tabs)/courses");
+      }
+
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }
@@ -42,52 +74,35 @@ export default function Login() {
     <View style={{ flex: 1, backgroundColor: "#ffffff", padding: 24 }}>
       {/* HEADER */}
       <View style={{ marginTop: 80, marginBottom: 40 }}>
-        <Text
-          style={{
-            fontSize: 26,
-            fontWeight: "bold",
-            color: "#020617",
-          }}
-        >
-          Student Login
+        <Text style={{ fontSize: 26, fontWeight: "bold", color: "#020617" }}>
+          Login
         </Text>
 
-        <Text
-          style={{
-            color: "#475569",
-            marginTop: 8,
-            fontSize: 14,
-          }}
-        >
-          Login using your Student ID provided by the institute
+        <Text style={{ color: "#475569", marginTop: 8, fontSize: 14 }}>
+          Login using your credentials
         </Text>
       </View>
 
-      {/* STUDENT ID */}
+      {/* USERNAME */}
       <View style={{ marginBottom: 16 }}>
-        <Text style={{ color: "#020617", marginBottom: 6, fontWeight: "500" }}>
-          Student ID
-        </Text>
+        <Text style={{ marginBottom: 6, fontWeight: "500" }}>Username</Text>
         <TextInput
-          value={studentId}
-          onChangeText={setStudentId}
-          placeholder="Enter your student ID"
+          value={username}
+          onChangeText={setUsername}
+          placeholder="stu101 / teacher01"
           autoCapitalize="none"
           style={{
             borderWidth: 1,
             borderColor: "#e2e8f0",
             borderRadius: 12,
             padding: 14,
-            fontSize: 15,
           }}
         />
       </View>
 
       {/* PASSWORD */}
       <View style={{ marginBottom: 10 }}>
-        <Text style={{ color: "#020617", marginBottom: 6, fontWeight: "500" }}>
-          Password
-        </Text>
+        <Text style={{ marginBottom: 6, fontWeight: "500" }}>Password</Text>
 
         <View
           style={{
@@ -102,13 +117,9 @@ export default function Login() {
           <TextInput
             value={password}
             onChangeText={setPassword}
-            placeholder="Enter your password"
+            placeholder="******"
             secureTextEntry={!showPassword}
-            style={{
-              flex: 1,
-              paddingVertical: 14,
-              fontSize: 15,
-            }}
+            style={{ flex: 1, paddingVertical: 14 }}
           />
 
           <Pressable onPress={() => setShowPassword(!showPassword)}>
@@ -121,7 +132,7 @@ export default function Login() {
         </View>
       </View>
 
-      {/* ERROR MESSAGE */}
+      {/* ERROR */}
       {error ? (
         <Text style={{ color: "#dc2626", marginBottom: 10 }}>{error}</Text>
       ) : null}
@@ -147,19 +158,6 @@ export default function Login() {
           </Text>
         )}
       </Pressable>
-
-      {/* FOOTER */}
-      <View style={{ marginTop: 30 }}>
-        <Text
-          style={{
-            color: "#64748b",
-            fontSize: 13,
-            textAlign: "center",
-          }}
-        >
-          © 2025 Cyber Security Institute
-        </Text>
-      </View>
     </View>
   );
 }

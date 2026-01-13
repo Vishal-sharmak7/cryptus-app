@@ -6,7 +6,6 @@ import { Ionicons } from "@expo/vector-icons";
 
 type CourseParams = {
   title?: string;
-  level?: string;
   duration?: string;
 };
 
@@ -23,7 +22,7 @@ interface BulletProps {
 /* ---------------- SCREEN ---------------- */
 
 export default function CourseDetail() {
-  const { title, level, duration } =
+  const { title, duration } =
     useLocalSearchParams<CourseParams>();
 
   return (
@@ -70,7 +69,6 @@ export default function CourseDetail() {
 
       {/* INFO CARDS */}
       <View style={{ marginTop: 30 }}>
-        <InfoRow icon="school" label="Level" value={level ?? "N/A"} />
         <InfoRow icon="time" label="Duration" value={duration ?? "N/A"} />
         <InfoRow
           icon="shield-checkmark"

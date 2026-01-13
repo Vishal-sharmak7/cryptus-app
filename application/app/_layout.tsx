@@ -1,50 +1,35 @@
-import { Stack } from "expo-router";
-import { Image } from "react-native";
-import { AuthProvider } from "./context/AuthContext";
+import { Stack, Redirect } from "expo-router";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ActivityIndicator, View } from "react-native";
 
-export default function RootLayout() {
+function RootLayout() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return <Redirect href="/login" />;
+  }
+
+  // 🎯 ROLE BASED REDIRECT
+  if (user.role === "teacher") {
+    return <Redirect href="/teacher/dashboard" />;
+  }
+
+  return <Redirect href="/(tabs)/courses" />;
+}
+
+export default function Layout() {
   return (
     <AuthProvider>
-      <Stack
-        screenOptions={{
-          headerTitleAlign: "center",
-
-          // ✅ Global logo in header
-          headerTitle: () => (
-            <Image
-              source={require("../assets/images/logo.png")}
-              style={{ width: 160, height: 40 }}
-              resizeMode="contain"
-            />
-          ),
-
-          headerShadowVisible: false,
-          headerStyle: {
-            backgroundColor: "#ffffff",
-          },
-        }}
-      >
-        {/* Tabs (no header, tabs manage their own header) */}
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-
-        {/* Course detail → keep default back */}
-        <Stack.Screen name="course-detail" />
-
-        {/* Login → keep default back */}
-        <Stack.Screen name="login" />
-
-        {/* 🔴 Enrolled Courses → REMOVE native back arrow */}
-        <Stack.Screen
-          name="enrolled-courses"
-          options={{
-            headerBackVisible: false, // removes back arrow
-            headerLeft: () => null,   // extra safety
-          }}
-        />
-
-        {/* Mark attendance → normal back allowed */}
-        <Stack.Screen name="mark-attendance" />
-      </Stack>
+      <RootLayout />
+      <Stack screenOptions={{ headerShown: false }} />
     </AuthProvider>
   );
 }

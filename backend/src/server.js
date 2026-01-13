@@ -3,6 +3,8 @@ dotenv.config();
 import express from "express";
 import router from "./routes/router.js";
 import connectDB from "./config/db.js";
+import cors from "cors"
+
 
 const app = express(); // create express app
 const PORT = process.env.PORT || 3000; // default port 3000
@@ -10,7 +12,7 @@ const PORT = process.env.PORT || 3000; // default port 3000
 connectDB(); // connect to database
 
 
-
+app.use(cors())
 app.use(express.json()); // to parse json data
 app.use(express.urlencoded({extended:true})); // to parse urlencoded data
 

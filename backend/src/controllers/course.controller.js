@@ -2,16 +2,22 @@ import Course from "../models/course.model.js";
 
 export const createCourse = async (req, res) => {
   try {
-    const { courseId, tittle, duration } = req.body;
+    const { courseId, title, duration, batch, department } = req.body;
 
-    if (!courseId || !tittle || !duration) {
-      return res.status(400).json({ message: "Input fields are required" });
+    if (!courseId || !title || !duration) {
+      return res.status(400).json({ message: "All fields are required" });
     }
+
+    // ✅ teacher comes from JWT
+    const teacherId = req.user._id;
 
     const course = await Course.create({
       courseId,
-      tittle,
+      title,
       duration,
+      batch,
+      department,
+      teacher: teacherId,
     });
 
     return res.status(201).json({
@@ -25,7 +31,6 @@ export const createCourse = async (req, res) => {
     });
   }
 };
-
 
 
 export const getCourse = async (req, res) => {
