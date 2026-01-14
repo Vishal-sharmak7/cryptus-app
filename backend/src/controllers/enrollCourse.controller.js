@@ -5,7 +5,7 @@ import Course from "../models/course.model.js";
 
 export const enrollCourse = async (req, res) => {
   try {
-    const student = req.user._id; // ✅ from JWT
+    const student = req.user._id; 
     const { course } = req.body;
 
     if (!course) {

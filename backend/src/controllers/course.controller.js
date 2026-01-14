@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Course from "../models/course.model.js";
 
 export const createCourse = async (req, res) => {
@@ -71,5 +72,63 @@ export const deleteCourse = async (req, res) => {
       message: "Course deletion failed",
       error: error.message,
     });
+  }
+};
+
+
+export const getCourseStudents = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const courseObjectId = new mongoose.Types.ObjectId(courseId);
+
+    const data = await Course.aggregate([
+      // 1️⃣ match course
+      {
+        $match: { _id: courseObjectId },
+      },
+
+      // 2️⃣ unwind students array
+      {
+        $unwind: "$students",
+      },
+
+      // 3️⃣ lookup student details
+      {
+        $lookup: {
+          from: "users",
+          localField: "students",
+          foreignField: "_id",
+          as: "student",
+        },
+      },
+
+      // 4️⃣ unwind student array
+      {
+        $unwind: "$student",
+      },
+
+      // 5️⃣ project only required fields
+      {
+        $project: {
+          _id: 0,
+          studentId: "$student._id",
+          name: "$student.name",
+          username: "$student.username",
+          role: "$student.role",
+          studentIdNumber: "$student.studentId",
+          batch: "$student.batch",
+          courseTitle: "$title",
+          courseCode: "$courseId",
+        },
+      },
+    ]);
+
+    res.json({
+      total: data.length,
+      students: data,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
