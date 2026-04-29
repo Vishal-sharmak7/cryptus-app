@@ -1,0 +1,140 @@
+diff --git a/node_modules/@react-navigation/bottom-tabs/src/views/BottomTabBar.tsx b/node_modules/@react-navigation/bottom-tabs/src/views/BottomTabBar.tsx
+index 55b9c8f..46de8ff 100644
+--- a/node_modules/@react-navigation/bottom-tabs/src/views/BottomTabBar.tsx
++++ b/node_modules/@react-navigation/bottom-tabs/src/views/BottomTabBar.tsx
+@@ -324,15 +324,15 @@ export function BottomTabBar({
+           Platform.OS === 'web'
+             ? tabBarPosition === 'right'
+             : (direction === 'rtl' && tabBarPosition === 'left') ||
+-              (direction !== 'rtl' && tabBarPosition === 'right')
++            (direction !== 'rtl' && tabBarPosition === 'right')
+         )
+           ? { borderLeftWidth: StyleSheet.hairlineWidth }
+           : (
+-                Platform.OS === 'web'
+-                  ? tabBarPosition === 'left'
+-                  : (direction === 'rtl' && tabBarPosition === 'right') ||
+-                    (direction !== 'rtl' && tabBarPosition === 'left')
+-              )
++            Platform.OS === 'web'
++              ? tabBarPosition === 'left'
++              : (direction === 'rtl' && tabBarPosition === 'right') ||
++              (direction !== 'rtl' && tabBarPosition === 'left')
++          )
+             ? { borderRightWidth: StyleSheet.hairlineWidth }
+             : tabBarPosition === 'top'
+               ? { borderBottomWidth: StyleSheet.hairlineWidth }
+@@ -344,45 +344,45 @@ export function BottomTabBar({
+         },
+         sidebar
+           ? {
+-              paddingTop:
+-                (hasHorizontalLabels ? spacing : spacing / 2) + insets.top,
+-              paddingBottom:
+-                (hasHorizontalLabels ? spacing : spacing / 2) + insets.bottom,
+-              paddingStart:
+-                spacing + (tabBarPosition === 'left' ? insets.left : 0),
+-              paddingEnd:
+-                spacing + (tabBarPosition === 'right' ? insets.right : 0),
+-              minWidth: minSidebarWidth,
+-            }
++            paddingTop:
++              (hasHorizontalLabels ? spacing : spacing / 2) + insets.top,
++            paddingBottom:
++              (hasHorizontalLabels ? spacing : spacing / 2) + insets.bottom,
++            paddingStart:
++              spacing + (tabBarPosition === 'left' ? insets.left : 0),
++            paddingEnd:
++              spacing + (tabBarPosition === 'right' ? insets.right : 0),
++            minWidth: minSidebarWidth,
++          }
+           : [
+-              {
+-                transform: [
+-                  {
+-                    translateY: visible.interpolate({
+-                      inputRange: [0, 1],
+-                      outputRange: [
+-                        layout.height +
+-                          insets[tabBarPosition === 'top' ? 'top' : 'bottom'] +
+-                          StyleSheet.hairlineWidth,
+-                        0,
+-                      ],
+-                    }),
+-                  },
+-                ],
+-                // Absolutely position the tab bar so that the content is below it
+-                // This is needed to avoid gap at bottom when the tab bar is hidden
+-                position: isTabBarHidden ? 'absolute' : undefined,
+-              },
+-              {
+-                height: tabBarHeight,
+-                paddingBottom: tabBarPosition === 'bottom' ? insets.bottom : 0,
+-                paddingTop: tabBarPosition === 'top' ? insets.top : 0,
+-                paddingHorizontal: Math.max(insets.left, insets.right),
+-              },
+-            ],
++            {
++              transform: [
++                {
++                  translateY: visible.interpolate({
++                    inputRange: [0, 1],
++                    outputRange: [
++                      layout.height +
++                      insets[tabBarPosition === 'top' ? 'top' : 'bottom'] +
++                      StyleSheet.hairlineWidth,
++                      0,
++                    ],
++                  }),
++                },
++              ],
++              // Absolutely position the tab bar so that the content is below it
++              // This is needed to avoid gap at bottom when the tab bar is hidden
++              position: isTabBarHidden ? 'absolute' : undefined,
++            },
++            {
++              height: tabBarHeight,
++              paddingBottom: tabBarPosition === 'bottom' ? insets.bottom : 0,
++              paddingTop: tabBarPosition === 'top' ? insets.top : 0,
++              paddingHorizontal: Math.max(insets.left, insets.right),
++            },
++          ],
+         tabBarStyle,
++        { pointerEvents: isTabBarHidden ? 'none' : 'auto' },
+       ]}
+-      pointerEvents={isTabBarHidden ? 'none' : 'auto'}
+       onLayout={sidebar ? undefined : handleLayout}
+     >
+       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+@@ -422,9 +422,9 @@ export function BottomTabBar({
+             typeof options.tabBarLabel === 'function'
+               ? options.tabBarLabel
+               : getLabel(
+-                  { label: options.tabBarLabel, title: options.title },
+-                  route.name
+-                );
++                { label: options.tabBarLabel, title: options.title },
++                route.name
++              );
+ 
+           const accessibilityLabel =
+             options.tabBarAccessibilityLabel !== undefined
+@@ -473,12 +473,12 @@ export function BottomTabBar({
+                   style={[
+                     sidebar
+                       ? {
+-                          marginVertical: hasHorizontalLabels
+-                            ? tabBarVariant === 'material'
+-                              ? 0
+-                              : 1
+-                            : spacing / 2,
+-                        }
++                        marginVertical: hasHorizontalLabels
++                          ? tabBarVariant === 'material'
++                            ? 0
++                            : 1
++                          : spacing / 2,
++                      }
+                       : styles.bottomItem,
+                     options.tabBarItemStyle,
+                   ]}
